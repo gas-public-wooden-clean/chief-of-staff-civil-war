@@ -28,15 +28,15 @@ namespace ChiefOfStaffCivilWar
 			_weights.Add(new WeightedOutcomeNested(group, weight));
 		}
 
-		public T Get(Random generator)
+		public T Get(Random random)
 		{
-			double value = generator.NextDouble() * _totalWeight;
+			double value = random.NextDouble() * _totalWeight;
 
 			foreach (WeightedOutcomeLeaf outcome in _weights)
 			{
 				if (outcome.Weight > value)
 				{
-					return outcome.Get(generator);
+					return outcome.Get(random);
 				}
 			}
 

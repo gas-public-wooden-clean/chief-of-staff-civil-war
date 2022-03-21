@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ChiefOfStaffCivilWar
 {
@@ -45,7 +46,13 @@ namespace ChiefOfStaffCivilWar
 
 		static void Play(Random random, TeamController unionController, TeamController confederacyController, int numTheatres)
 		{
-			War war = new War(numTheatres);
+			Team union = Team.SetupUnion(random);
+			Team confederacy = Team.SetupConfederacy(random);
+
+			for (War war = new War(numTheatres); !war.IsGameOver; war.AdvanceTime())
+			{
+
+			}
 		}
 
 		static TeamController GetTeamController()

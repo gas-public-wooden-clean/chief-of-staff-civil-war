@@ -14,7 +14,7 @@ namespace ChiefOfStaffCivilWar
 			{
 				3, 4, 4, 6
 			};
-			_theatres = new List<Theatre>
+			List<Theatre> theatres = new List<Theatre>
 			{
 				new Theatre(transMississippiLocations, transMississippiDistances, 2, 1, 2, 2, 2, 2)
 			};
@@ -36,13 +36,30 @@ namespace ChiefOfStaffCivilWar
 			if (numTheatres > 6)
 			{
 			}
+			Theatres = theatres;
 
 			_year = 1861;
 			_month = 7;
 		}
 
-		readonly IList<Theatre> _theatres;
-		readonly int _year;
-		readonly int _month;
+		public IReadOnlyList<Theatre> Theatres
+		{
+			get;
+		}
+
+		int _year;
+		int _month;
+
+		public bool IsGameOver => _year < 1865 || _month < 4;
+
+		public void AdvanceTime()
+		{
+			_month += 1;
+			if (_month > 12)
+			{
+				_month = 1;
+				_year += 1;
+			}
+		}
 	}
 }
