@@ -1,0 +1,6 @@
+namespace ChiefOfStaffCivilWar
+{
+	interface TeamController
+	{
+	}
+}
