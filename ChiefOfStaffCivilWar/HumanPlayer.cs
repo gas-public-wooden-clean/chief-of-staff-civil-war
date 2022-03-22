@@ -1,11 +1,13 @@
 using System;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ChiefOfStaffCivilWar
 {
 	class HumanPlayer : TeamController
 	{
-		private HumanPlayer() { }
+		HumanPlayer() { }
 
 		static readonly HumanPlayer _instance = new HumanPlayer();
 
@@ -14,11 +16,11 @@ namespace ChiefOfStaffCivilWar
 			return _instance;
 		}
 
-		public static int GetInt32(int max)
+		public static int GetInt32(int min, int max)
 		{
 			int selection;
 			while (!TryGetInt32(out selection) ||
-				selection < 1 || selection > max)
+				selection < min || selection > max)
 			{
 				Console.Out.Write("Invalid option. Try again: ");
 			}
@@ -26,10 +28,20 @@ namespace ChiefOfStaffCivilWar
 			return selection;
 		}
 
-		private static bool TryGetInt32(out int entry)
+		static bool TryGetInt32(out int entry)
 		{
 			string input = Console.ReadLine();
 			return int.TryParse(input, NumberStyles.None, CultureInfo.CurrentCulture, out entry);
+		}
+
+		public void SendMessage(string message, CancellationToken cancellationToken)
+		{
+			Console.Out.Write(message);
+		}
+
+		public Task<int> GetMenuOption(int max, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(GetInt32(1, max));
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace ChiefOfStaffCivilWar
 			return new Team(random, missions, history);
 		}
 
-		private Team(Random random, IEnumerable<string> missions, IReadOnlyDictionary<int, IEnumerable<string>> historyByYear)
+		Team(Random random, IEnumerable<string> missions, IReadOnlyDictionary<int, IEnumerable<string>> historyByYear)
 		{
 			// Shuffle mission deck.
 			_missionDeck = new Deck<string>(random, missions);
@@ -46,8 +46,6 @@ namespace ChiefOfStaffCivilWar
 				historyDecks.Add(year.Key, deckYear);
 			}
 			_historyByYear = historyDecks;
-
-			_controller = controller;
 		}
 
 		readonly Deck<string> _missionDeck;
