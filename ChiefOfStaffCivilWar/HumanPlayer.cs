@@ -34,9 +34,15 @@ namespace ChiefOfStaffCivilWar
 			return int.TryParse(input, NumberStyles.None, CultureInfo.CurrentCulture, out entry);
 		}
 
-		public void SendMessage(string message, CancellationToken cancellationToken)
+		public Task SendMessage(string message, CancellationToken cancellationToken)
 		{
-			Console.Out.Write(message);
+			Console.Out.Write(message.Replace("\n", Environment.NewLine));
+			return Task.CompletedTask;
+		}
+
+		public Task SendMessage(string format, CancellationToken cancellationToken, params object[] args)
+		{
+			return SendMessage(string.Format(CultureInfo.CurrentCulture, format, args), cancellationToken);
 		}
 
 		public Task<int> GetMenuOption(int max, CancellationToken cancellationToken)

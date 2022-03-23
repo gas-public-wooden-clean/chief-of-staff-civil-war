@@ -15,7 +15,14 @@ namespace ChiefOfStaffCivilWar
 			return Task.FromResult(_random.Next(max) + 1);
 		}
 
-		public void SendMessage(string message, CancellationToken cancellationToken)
-		{ }
+		public Task SendMessage(string format, CancellationToken cancellationToken, params object[] args)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task SendMessage(string message, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

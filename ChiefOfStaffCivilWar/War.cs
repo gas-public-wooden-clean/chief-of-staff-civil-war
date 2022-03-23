@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 
 namespace ChiefOfStaffCivilWar
 {
 	class War
 	{
-		public War(int numTheatres)
+		public War(Random random, int numTheaters)
 		{
 			IEnumerable<string> transMississippiLocations = new string[]
 			{
@@ -14,51 +15,62 @@ namespace ChiefOfStaffCivilWar
 			{
 				3, 4, 4, 6
 			};
-			List<Theatre> theatres = new List<Theatre>
+			TeamTheater transMississippiUnion = new TeamTheater(random, 2, 1, 2, new string[] { "Win the game." });
+			TeamTheater transMississippiConfederacy = new TeamTheater(random, 2, 2, 2, new string[] { "Win the game." });
+			List<Theater> theaters = new List<Theater>
 			{
-				new Theatre(transMississippiLocations, transMississippiDistances, 2, 1, 2, 2, 2, 2)
+				new Theater("Trans-Mississippi", transMississippiLocations, transMississippiDistances, transMississippiUnion, transMississippiConfederacy)
 			};
-			if (numTheatres > 1)
+			if (numTheaters > 1)
 			{
 			}
-			if (numTheatres > 2)
+			if (numTheaters > 2)
 			{
 			}
-			if (numTheatres > 3)
+			if (numTheaters > 3)
 			{
 			}
-			if (numTheatres > 4)
+			if (numTheaters > 4)
 			{
 			}
-			if (numTheatres > 5)
+			if (numTheaters > 5)
 			{
 			}
-			if (numTheatres > 6)
+			if (numTheaters > 6)
 			{
 			}
-			Theatres = theatres;
+			Theaters = theaters;
 
-			_year = 1861;
-			_month = 7;
+			Year = 1861;
+			Month = 4;
 		}
 
-		public IReadOnlyList<Theatre> Theatres
+		public IReadOnlyList<Theater> Theaters
 		{
 			get;
 		}
 
-		int _year;
-		int _month;
+		public int Year
+		{
+			get;
+			private set;
+		}
 
-		public bool IsGameOver => _year < 1865 || _month < 4;
+		public int Month
+		{
+			get;
+			private set;
+		}
+
+		public bool IsGameOver => Year >= 1865;
 
 		public void AdvanceTime()
 		{
-			_month += 1;
-			if (_month > 12)
+			Month += 1;
+			if (Month > 12)
 			{
-				_month = 1;
-				_year += 1;
+				Month = 1;
+				Year += 1;
 			}
 		}
 	}

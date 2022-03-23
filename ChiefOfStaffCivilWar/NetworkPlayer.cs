@@ -24,11 +24,16 @@ namespace ChiefOfStaffCivilWar
 		int _bufferStart;
 		int _bufferEnd;
 
-		public async void SendMessage(string message, CancellationToken cancellationToken)
+		public async Task SendMessage(string message, CancellationToken cancellationToken)
 		{
 			byte[] bytes = _strictUtf8.GetBytes(message);
 			Socket socket = await _client;
 			await socket.SendAsync(bytes.AsMemory(), SocketFlags.None, cancellationToken);
+		}
+
+		public Task SendMessage(string format, CancellationToken cancellationToken, params object[] args)
+		{
+			return SendMessage(string.Format(CultureInfo.CurrentCulture, format, args), cancellationToken);
 		}
 
 		public async Task<int> GetMenuOption(int max, CancellationToken cancellationToken)
@@ -38,7 +43,7 @@ namespace ChiefOfStaffCivilWar
 			while (!int.TryParse(input, NumberStyles.None, CultureInfo.CurrentCulture, out selection) ||
 				selection < 1 || selection > max)
 			{
-				SendMessage("Invalid option. Try again: ", cancellationToken);
+				await SendMessage("Invalid option. Try again: ", cancellationToken);
 				input = await ReadLine(cancellationToken);
 			}
 

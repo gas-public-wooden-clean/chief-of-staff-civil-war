@@ -5,7 +5,8 @@ namespace ChiefOfStaffCivilWar
 {
 	interface TeamController
 	{
-		void SendMessage(string message, CancellationToken cancellationToken);
+		Task SendMessage(string message, CancellationToken cancellationToken);
+		Task SendMessage(string format, CancellationToken cancellationToken, params object[] args);
 		Task<int> GetMenuOption(int max, CancellationToken cancellationToken);
 	}
 }
