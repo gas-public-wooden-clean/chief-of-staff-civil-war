@@ -53,24 +53,38 @@ namespace ChiefOfStaffCivilWar
 			Team union = Team.SetupUnion(random);
 			Team confederacy = Team.SetupConfederacy(random);
 
+			NameGenerator namer = new NameGenerator(random);
+
 			CancellationTokenSource canceller = new CancellationTokenSource();
 
-			for (War war = new War(random, numTheaters); !war.IsGameOver; war.AdvanceTime())
+			for (War war = new War(random, namer, numTheaters); !war.IsGameOver; war.AdvanceTime())
 			{
-				Task unionTurn = Turn(random, unionController, war, union, true, canceller.Token);
-				Task confederacyTurn = Turn(random, confederacyController, war, confederacy, false, canceller.Token);
+				foreach (Theater theater in war.Theaters)
+				{
+					foreach (Team side in new Team[] { union, confederacy })
+					{
+						TeamTheater teamTheater = theater.GetSide(side.IsUnion);
+						side.TheaterDiscard.Add(teamTheater.TheaterCard);
+						teamTheater.TheaterCard = null;
+					}
+				}
+
+				Task unionTurn = Turn(random, unionController, war, union, canceller.Token);
+				Task confederacyTurn = Turn(random, confederacyController, war, confederacy, canceller.Token);
 				await unionTurn;
 				await confederacyTurn;
 			}
 		}
 
-		static async Task Turn(Random random, TeamController controller, War war, Team team, bool isUnion, CancellationToken cancellationToken)
+		static async Task Turn(Random random, TeamController controller, War war, Team team, CancellationToken cancellationToken)
 		{
+			await controller.SendMessage("{0} {1}: {2} turns remaining (after this one).\n", cancellationToken, war.MonthName, war.Year, war.TurnsRemaining);
+
 			if (war.Month is 1)
 			{
 				foreach (Theater theater in war.Theaters)
 				{
-					TeamTheater teamTheater = theater.GetSide(isUnion);
+					TeamTheater teamTheater = theater.GetSide(team.IsUnion);
 					string mission = teamTheater.DrawMission();
 					if (mission is not null)
 					{
@@ -82,7 +96,7 @@ namespace ChiefOfStaffCivilWar
 			string history = team.GetHistory(war.Year);
 			if (history is not null)
 			{
-				await controller.SendMessage("History: {0}\n", cancellationToken, history);
+				await controller.SendMessage("History: {0}.\n", cancellationToken, history);
 			}
 
 			IList<bool> playedTheaters = new List<bool>(war.Theaters.Count);
@@ -98,17 +112,21 @@ namespace ChiefOfStaffCivilWar
 				await controller.SendMessage("1. View summary.\n", cancellationToken);
 				await controller.SendMessage("2. View theater.\n", cancellationToken);
 				await controller.SendMessage("3. Play a theater card.\n", cancellationToken);
-				await controller.SendMessage("4. End turn.\n", cancellationToken);
-				selected = await controller.GetMenuOption(4, cancellationToken);
+				await controller.SendMessage("4. Command armies.\n", cancellationToken);
+				await controller.SendMessage("5. End turn.\n", cancellationToken);
+				selected = await controller.GetMenuOption(5, cancellationToken);
 				switch (selected)
 				{
 					case 1:
+						await ViewSummary(controller, war, team, cancellationToken);
 						break;
 					case 2:
-						await ViewTheater(controller, war, isUnion, cancellationToken);
+						await ViewTheater(controller, war, team.IsUnion, cancellationToken);
 						break;
 					case 3:
-						await PlayTheaterCard(controller, war, isUnion, playedTheaters, cancellationToken);
+						await PlayTheaterCard(controller, war, team, playedTheaters, cancellationToken);
+						break;
+					case 4:
 						break;
 					default:
 						if (playedTheaters.Contains(false))
@@ -124,7 +142,33 @@ namespace ChiefOfStaffCivilWar
 						}
 						break;
 				}
-			} while (selected != 4);
+			} while (selected != 5);
+		}
+
+		static async Task ViewSummary(TeamController controller, War war, Team team, CancellationToken cancellationToken)
+		{
+			await controller.SendMessage("{0} {1}: {2} turns remaining (after this one).\n", cancellationToken, war.MonthName, war.Year, war.TurnsRemaining);
+			await controller.SendMessage("1. View theater hand.\n", cancellationToken);
+			await controller.SendMessage("2. View theater discard.\n", cancellationToken);
+			await controller.SendMessage("3. Back.\n", cancellationToken);
+			int selection = await controller.GetMenuOption(3, cancellationToken);
+			switch (selection)
+			{
+				case 1:
+					foreach (string theater in team.TheaterHand)
+					{
+						await controller.SendMessage(theater + "\n", cancellationToken);
+					}
+					break;
+				case 2:
+					foreach (string theater in team.TheaterDiscard)
+					{
+						await controller.SendMessage(theater + "\n", cancellationToken);
+					}
+					break;
+				default:
+					break;
+			}
 		}
 
 		static async Task ViewTheater(TeamController controller, War war, bool isUnion, CancellationToken cancellationToken)
@@ -142,9 +186,20 @@ namespace ChiefOfStaffCivilWar
 			await controller.SendMessage("Monthly Supply: {0}.\n", cancellationToken, teamTheater.Supply);
 			await controller.SendMessage("Monthly Recruits: {0}.\n", cancellationToken, teamTheater.Recruit);
 			await controller.SendMessage("Assign General Surcharge: ${0}.\n", cancellationToken, teamTheater.LeadershipCost);
+			await controller.SendMessage("Played theater card: {0}.\n", cancellationToken, teamTheater.TheaterCard ?? "None");
+			await controller.SendMessage("Missions:\n", cancellationToken);
+			foreach (string mission in teamTheater.ActiveMissions)
+			{
+				await controller.SendMessage(mission + "\n", cancellationToken);
+			}
+			await controller.SendMessage("Generals:\n", cancellationToken);
+			foreach (General general in teamTheater.Generals)
+			{
+				await controller.SendMessage(general.Name.ToString() + "\n", cancellationToken);
+			}
 		}
 
-		static async Task PlayTheaterCard(TeamController controller, War war, bool isUnion, IList<bool> playedTheaters, CancellationToken cancellationToken)
+		static async Task PlayTheaterCard(TeamController controller, War war, Team team, IList<bool> playedTheaters, CancellationToken cancellationToken)
 		{
 			await controller.SendMessage("Which theater would you like to play in?\n", cancellationToken);
 			for (int i = 0; i < war.Theaters.Count; i++)
@@ -158,18 +213,30 @@ namespace ChiefOfStaffCivilWar
 			}
 			await controller.SendMessage("{0}. Back.\n", cancellationToken, war.Theaters.Count + 1);
 
-			int selection = await controller.GetMenuOption(war.Theaters.Count, cancellationToken);
-			if (selection == war.Theaters.Count + 1)
+			int theaterNumber = await controller.GetMenuOption(war.Theaters.Count + 1, cancellationToken);
+			if (theaterNumber == war.Theaters.Count + 1)
 			{
 				return;
 			}
-			if (playedTheaters[selection - 1])
+			if (playedTheaters[theaterNumber - 1])
 			{
 				await controller.SendMessage("You've already played a theater card there this turn.\n", cancellationToken);
 				return;
 			}
 
-			playedTheaters[selection - 1] = true;
+			await controller.SendMessage("Which card would you like to play?\n", cancellationToken);
+			for (int i = 0; i < team.TheaterHand.Count; i++)
+			{
+				await controller.SendMessage("{0}. {1}.\n", cancellationToken, i + 1, team.TheaterHand[i]);
+			}
+			await controller.SendMessage("{0}. Back.\n", cancellationToken, team.TheaterHand.Count + 1);
+			int cardNumber = await controller.GetMenuOption(team.TheaterHand.Count + 1, cancellationToken);
+			if (cardNumber == team.TheaterHand.Count + 1)
+			{
+				return;
+			}
+			team.PlayTheater(cardNumber - 1, war.Theaters[theaterNumber - 1]);
+			playedTheaters[theaterNumber - 1] = true;
 		}
 
 		static TeamController GetTeamController(Random random)
