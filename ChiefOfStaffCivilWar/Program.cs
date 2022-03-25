@@ -71,8 +71,18 @@ namespace ChiefOfStaffCivilWar
 
 				Task unionTurn = Turn(random, unionController, war, union, canceller.Token);
 				Task confederacyTurn = Turn(random, confederacyController, war, confederacy, canceller.Token);
-				await unionTurn;
-				await confederacyTurn;
+
+				Task finishedFirst = await Task.WhenAny(unionTurn, confederacyTurn);
+				if (unionTurn == finishedFirst)
+				{
+					await unionController.SendMessage("Waiting for other player...\n", canceller.Token);
+					await confederacyTurn;
+				}
+				else
+				{
+					await confederacyController.SendMessage("Waiting for other player...\n", canceller.Token);
+					await unionTurn;
+				}
 			}
 		}
 
@@ -143,8 +153,6 @@ namespace ChiefOfStaffCivilWar
 						break;
 				}
 			} while (selected != 5);
-
-			await controller.SendMessage("Waiting for other player...\n", cancellationToken);
 		}
 
 		static async Task ViewSummary(TeamController controller, War war, Team team, CancellationToken cancellationToken)
