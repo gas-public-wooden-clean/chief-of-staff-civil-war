@@ -5,20 +5,25 @@ namespace ChiefOfStaffCivilWar
 {
 	class TeamTheater
 	{
-		public TeamTheater(Random random, int supply, int recruit, int leadershipCost, IEnumerable<string> missions)
+		public TeamTheater(Random random, int supply, int recruit, int leadershipCost, IEnumerable<string> missions, WeightedOutcomes<string> regimentOrigins)
 		{
+			_random = random;
 			SupplyIncome = supply;
 			RecruitIncome = recruit;
 			LeadershipCost = leadershipCost;
 			_missionDeck = new List<string>(new Deck<string>(random, missions));
+			_regimentOrigins = regimentOrigins;
 			_activeMissions = new List<string>();
 			_generals = new List<General>();
-			Regiments = new List<Regiment>();
+			_regiments = new List<Regiment>();
 		}
 
+		readonly Random _random;
 		readonly IList<string> _missionDeck;
 		readonly IList<string> _activeMissions;
+		readonly IList<Regiment> _regiments;
 		readonly IList<General> _generals;
+		readonly WeightedOutcomes<string> _regimentOrigins;
 
 		public string TheaterCard { get; set; }
 
@@ -36,7 +41,7 @@ namespace ChiefOfStaffCivilWar
 
 		public IEnumerable<General> Generals => _generals;
 
-		public ICollection<Regiment> Regiments { get; }
+		public IEnumerable<Regiment> Regiments => _regiments;
 
 		public string DrawMission()
 		{
@@ -54,6 +59,11 @@ namespace ChiefOfStaffCivilWar
 		public void AddGeneral(General general)
 		{
 			_generals.Add(general);
+		}
+
+		public void AddRegiment(int level)
+		{
+			_regiments.Add(new Regiment(_regimentOrigins.Get(_random), level));
 		}
 	}
 }
