@@ -26,7 +26,7 @@ namespace ChiefOfStaffCivilWar
 
 		public async Task SendMessage(string message, CancellationToken cancellationToken)
 		{
-			byte[] bytes = _strictUtf8.GetBytes(message);
+			byte[] bytes = _strictUtf8.GetBytes(message.Replace("\n", "\r\n"));
 			Socket socket = await _client;
 			await socket.SendAsync(bytes.AsMemory(), SocketFlags.None, cancellationToken);
 		}

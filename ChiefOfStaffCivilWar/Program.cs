@@ -143,6 +143,8 @@ namespace ChiefOfStaffCivilWar
 						break;
 				}
 			} while (selected != 5);
+
+			await controller.SendMessage("Waiting for other player...\n", cancellationToken);
 		}
 
 		static async Task ViewSummary(TeamController controller, War war, Team team, CancellationToken cancellationToken)
@@ -183,8 +185,8 @@ namespace ChiefOfStaffCivilWar
 			Theater theater = war.Theaters[selection - 1];
 			TeamTheater teamTheater = theater.GetSide(isUnion);
 
-			await controller.SendMessage("Monthly Supply: {0}.\n", cancellationToken, teamTheater.Supply);
-			await controller.SendMessage("Monthly Recruits: {0}.\n", cancellationToken, teamTheater.Recruit);
+			await controller.SendMessage("Monthly Supply: {0}.\n", cancellationToken, teamTheater.SupplyIncome);
+			await controller.SendMessage("Monthly Recruits: {0}.\n", cancellationToken, teamTheater.RecruitIncome);
 			await controller.SendMessage("Assign General Surcharge: ${0}.\n", cancellationToken, teamTheater.LeadershipCost);
 			await controller.SendMessage("Played theater card: {0}.\n", cancellationToken, teamTheater.TheaterCard ?? "None");
 			await controller.SendMessage("Missions:\n", cancellationToken);
@@ -196,6 +198,11 @@ namespace ChiefOfStaffCivilWar
 			foreach (General general in teamTheater.Generals)
 			{
 				await controller.SendMessage(general.Name.ToString() + "\n", cancellationToken);
+			}
+			await controller.SendMessage("Regiments:\n", cancellationToken);
+			foreach (Regiment regiment in teamTheater.Regiments)
+			{
+				await controller.SendMessage(regiment.ToString() + "\n", cancellationToken);
 			}
 		}
 

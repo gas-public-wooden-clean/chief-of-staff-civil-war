@@ -49,6 +49,7 @@ namespace ChiefOfStaffCivilWar
 				"Taxes",
 				"Construct Depot"
 			};
+
 			return new Team(random, true, history, theater);
 		}
 
@@ -65,6 +66,7 @@ namespace ChiefOfStaffCivilWar
 			IEnumerable<string> theater = new string[]
 			{
 			};
+
 			return new Team(random, false, history, theater);
 		}
 

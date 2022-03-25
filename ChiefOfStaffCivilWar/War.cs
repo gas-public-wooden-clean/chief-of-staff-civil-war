@@ -8,9 +8,23 @@ namespace ChiefOfStaffCivilWar
 		public War(Random random, NameGenerator namer, int numTheaters)
 		{
 			TeamTheater transMississippiUnion = new TeamTheater(random, 2, 1, 2, new string[] { "Win the game." });
+			// Add the veterans first so they get a lower number than the volunteers.
+			transMississippiUnion.Regiments.Add(new Regiment(random, true, 3));
+			for (int i = 0; i < 3; i++)
+			{
+				transMississippiUnion.Regiments.Add(new Regiment(random, true, 1));
+			}
 			transMississippiUnion.AddGeneral(new General(random, namer, 1));
 
 			TeamTheater transMississippiConfederacy = new TeamTheater(random, 2, 2, 2, new string[] { "Win the game." });
+			// 4 militia regiments and 4 volunteer regiments.
+			for (int level = 2; level >= 1; level--)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					transMississippiConfederacy.Regiments.Add(new Regiment(random, false, level));
+				}
+			}
 			for (int i = 0; i < 3; i++)
 			{
 				transMississippiConfederacy.AddGeneral(new General(random, namer, 1));

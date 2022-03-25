@@ -7,12 +7,13 @@ namespace ChiefOfStaffCivilWar
 	{
 		public TeamTheater(Random random, int supply, int recruit, int leadershipCost, IEnumerable<string> missions)
 		{
-			Supply = supply;
-			Recruit = recruit;
+			SupplyIncome = supply;
+			RecruitIncome = recruit;
 			LeadershipCost = leadershipCost;
 			_missionDeck = new List<string>(new Deck<string>(random, missions));
 			_activeMissions = new List<string>();
 			_generals = new List<General>();
+			Regiments = new List<Regiment>();
 		}
 
 		readonly IList<string> _missionDeck;
@@ -21,15 +22,21 @@ namespace ChiefOfStaffCivilWar
 
 		public string TheaterCard { get; set; }
 
-		public int Supply { get; }
+		public int SupplyIncome { get; }
 
-		public int Recruit { get; }
+		public int Supplies { get; }
+
+		public int RecruitIncome { get; }
+
+		public int Recruits { get; }
 
 		public int LeadershipCost { get; }
 
 		public IEnumerable<string> ActiveMissions => _activeMissions;
 
 		public IEnumerable<General> Generals => _generals;
+
+		public ICollection<Regiment> Regiments { get; }
 
 		public string DrawMission()
 		{
